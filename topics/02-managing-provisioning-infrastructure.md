@@ -21,17 +21,28 @@ This domain tests your ability to set up and manage GCP infrastructure correctly
 ## 2.2 GCP Resource Hierarchy
 
 ### Hierarchy Levels (Top to Bottom)
-```
-Organization (e.g., example.com)
-├── Folder: Division A
-│   ├── Folder: Engineering
-│   │   ├── Project: dev-project-001
-│   │   ├── Project: staging-project-001
-│   │   └── Project: prod-project-001
-│   └── Folder: Data Science
-│       └── Project: ml-project-001
-└── Folder: Division B
-    └── Project: finance-project-001
+```mermaid
+graph TD
+    Org["Organization (e.g., example.com)"]
+    DivA["Folder: Division A"]
+    Eng["Folder: Engineering"]
+    DS["Folder: Data Science"]
+    DivB["Folder: Division B"]
+    Dev["Project: dev-project-001"]
+    Staging["Project: staging-project-001"]
+    Prod["Project: prod-project-001"]
+    ML["Project: ml-project-001"]
+    Finance["Project: finance-project-001"]
+
+    Org --> DivA
+    Org --> DivB
+    DivA --> Eng
+    DivA --> DS
+    Eng --> Dev
+    Eng --> Staging
+    Eng --> Prod
+    DS --> ML
+    DivB --> Finance
 ```
 
 ### Resource Hierarchy Key Principles

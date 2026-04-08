@@ -424,65 +424,66 @@ After migrating to GCP, EHR Healthcare wants to improve their disaster recovery 
 
 ## 10. Architecture Diagram (Text)
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          EHR Healthcare — GCP Architecture              │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  USERS / CLIENTS                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────────┐           │
-│  │  Clinicians  │  │   Patients   │  │  Lab Systems (MLLP) │           │
-│  └──────┬───────┘  └──────┬───────┘  └──────────┬──────────┘           │
-│         │                 │                       │                      │
-│  ┌──────▼─────────────────▼───────┐              │                      │
-│  │   Cloud Armor (WAF/DDoS)       │              │                      │
-│  │   HTTPS Load Balancer (Global) │              │                      │
-│  └──────────────────┬─────────────┘              │                      │
-│                     │                             │                      │
-│  ┌──────────────────▼────────────────────────────▼──────────────────┐  │
-│  │  VPC: ehr-vpc (us-east1)          VPC Service Controls Perimeter  │  │
-│  │                                                                    │  │
-│  │  ┌─────────────────────┐   ┌──────────────────────────────────┐  │  │
-│  │  │  GKE Autopilot      │   │  Cloud Healthcare API            │  │  │
-│  │  │  (EHR Core App)     │   │  ├── HL7v2 Store                 │  │  │
-│  │  │  Workload Identity  │   │  ├── FHIR R4 Store               │  │  │
-│  │  │  Anthos Svc Mesh    │   │  └── DICOM Store                 │  │  │
-│  │  └──────────┬──────────┘   └──────────────┬───────────────────┘  │  │
-│  │             │                              │ Pub/Sub notifications  │  │
-│  │  ┌──────────▼──────────┐   ┌──────────────▼───────────────────┐  │  │
-│  │  │  Cloud Run          │   │  Dataflow                        │  │  │
-│  │  │  (Patient Portal,   │   │  (HL7v2 → FHIR Transform)        │  │  │
-│  │  │   Lab Integration)  │   └──────────────────────────────────┘  │  │
-│  │  └──────────┬──────────┘                                          │  │
-│  │             │                                                       │  │
-│  │  ┌──────────▼──────────────────────────────────────────────────┐  │  │
-│  │  │  DATA LAYER                                                   │  │  │
-│  │  │  ┌────────────────┐  ┌─────────────────┐  ┌──────────────┐  │  │  │
-│  │  │  │ AlloyDB        │  │  Cloud SQL      │  │  Firestore   │  │  │  │
-│  │  │  │ (EHR OLTP)     │  │  (Portal/Sched) │  │  (Clinical   │  │  │  │
-│  │  │  │ CMEK encrypted │  │  CMEK encrypted │  │   Notes)     │  │  │  │
-│  │  │  └────────────────┘  └─────────────────┘  └──────────────┘  │  │  │
-│  │  │  ┌────────────────────────────────────────────────────────┐  │  │  │
-│  │  │  │  BigQuery (Analytics DW — reporting, BI)               │  │  │  │
-│  │  │  └────────────────────────────────────────────────────────┘  │  │  │
-│  │  └─────────────────────────────────────────────────────────────┘  │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│                                                                          │
-│  SECURITY & OPERATIONS                                                   │
-│  ┌─────────────────┐  ┌──────────────────┐  ┌───────────────────────┐  │
-│  │  Cloud KMS (HSM)│  │  Secret Manager  │  │  Security Command     │  │
-│  │  CMEK Keys      │  │  Credentials     │  │  Center Premium       │  │
-│  └─────────────────┘  └──────────────────┘  └───────────────────────┘  │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │  Cloud Audit Logs → Cloud Storage (locked bucket, 6yr retention)│    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-│                                                                          │
-│  HYBRID CONNECTIVITY                                                     │
-│  On-Premises DC ──── Dedicated Interconnect (10Gbps) ──── VPC           │
-│                  └── Cloud VPN (backup) ──────────────────┘             │
-│                                                                          │
-│  DR (us-central1): GKE Warm Standby + AlloyDB Cross-Region Replica      │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Clinicians((Clinicians))
+    Patients((Patients))
+    LabSystems(("Lab Systems (MLLP)"))
+
+    Clinicians --> Armor
+    Patients --> Armor
+    LabSystems --> Armor
+
+    Armor["Cloud Armor (WAF/DDoS) + HTTPS Load Balancer (Global)"]
+    Armor --> GKE
+    Armor --> CloudRun
+
+    subgraph VPC["VPC: ehr-vpc (us-east1) — VPC Service Controls Perimeter"]
+        GKE["GKE Autopilot (EHR Core App, Workload Identity, Anthos Svc Mesh)"]
+        HCAPI["Cloud Healthcare API (HL7v2 Store, FHIR R4 Store, DICOM Store)"]
+        CloudRun["Cloud Run (Patient Portal, Lab Integration)"]
+        Dataflow["Dataflow (HL7v2 to FHIR Transform)"]
+
+        subgraph DATALAYER[DATA LAYER]
+            AlloyDB["AlloyDB (EHR OLTP, CMEK encrypted)"]
+            CloudSQL["Cloud SQL (Portal/Scheduling, CMEK encrypted)"]
+            Firestore["Firestore (Clinical Notes)"]
+            BigQuery["BigQuery (Analytics DW)"]
+        end
+
+        GKE --> HCAPI
+        GKE --> CloudRun
+        HCAPI -->|"Pub/Sub notifications"| Dataflow
+        GKE --> AlloyDB
+        CloudRun --> CloudSQL
+        Dataflow --> Firestore
+        Dataflow --> BigQuery
+    end
+
+    subgraph SECURITY["SECURITY & OPERATIONS"]
+        KMS["Cloud KMS (HSM, CMEK Keys)"]
+        SecretMgr["Secret Manager (Credentials)"]
+        SCC["Security Command Center Premium"]
+        AuditLogs["Cloud Audit Logs to Cloud Storage (locked bucket, 6yr retention)"]
+    end
+
+    subgraph HYBRID[HYBRID CONNECTIVITY]
+        OnPrem[On-Premises DC]
+        Interconnect["Dedicated Interconnect (10 Gbps)"]
+        VPN["Cloud VPN (backup)"]
+        OnPrem -->|primary| Interconnect
+        OnPrem -->|backup| VPN
+    end
+
+    Interconnect --> GKE
+    VPN --> GKE
+
+    subgraph DR_REGION["DR: us-central1"]
+        GKEStandby["GKE Warm Standby"]
+        AlloyDBReplica["AlloyDB Cross-Region Replica"]
+    end
+
+    AlloyDB -.->|"cross-region replication"| AlloyDBReplica
 ```
 
 ---

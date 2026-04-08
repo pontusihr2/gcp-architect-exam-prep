@@ -469,67 +469,93 @@ Altostrat's ad server handles 2M real-time bidding (RTB) requests per second. Ea
 
 ## 10. Architecture Diagram (Text)
 
-```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                      Altostrat Media — GCP Architecture                      │
-├──────────────────────────────────────────────────────────────────────────────┤
-│                                                                               │
-│  CONTENT DELIVERY                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │  End Users (Global)                                                   │   │
-│  │       │                                                               │   │
-│  │  ┌────▼──────────────────────────────────────────────────────────┐  │   │
-│  │  │  Media CDN (30+ global PoPs)         Cloud CDN (web assets)   │  │   │
-│  │  │  HLS/DASH video segments             Thumbnails, metadata     │  │   │
-│  │  └────────────────────────┬──────────────────────────────────────┘  │   │
-│  │                           │ (cache miss: origin pull)                │   │
-│  │  ┌────────────────────────▼──────────────────────────────────────┐  │   │
-│  │  │  Cloud Storage (Multi-Region: US, EU, ASIA)                    │  │   │
-│  │  │  /video/hls/**, /video/dash/** — transcoded segments           │  │   │
-│  │  └───────────────────────────────────────────────────────────────┘  │   │
-│  └──────────────────────────────────────────────────────────────────────┘   │
-│                                                                               │
-│  CONTENT INGESTION & TRANSCODING                                             │
-│  Studio Upload → GCS (raw) → Pub/Sub → Cloud Run (Orchestrator)             │
-│                                               │                               │
-│                                    Transcoding API (managed)                 │
-│                                               │                               │
-│                              GCS (transcoded, multi-region)                  │
-│                                                                               │
-│  AI/ML LAYER                                                                 │
-│  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │  Content Intelligence                 Recommendation Engine          │   │
-│  │  ┌──────────────────────┐            ┌───────────────────────────┐  │   │
-│  │  │  Cloud Run (Enrichmt)│            │  Vertex AI Feature Store  │  │   │
-│  │  │       │              │            │  (user features)          │  │   │
-│  │  │  Gemini 1.5 Pro      │            └─────────────┬─────────────┘  │   │
-│  │  │  (vision, tagging)   │                          │                 │   │
-│  │  │       │              │            ┌─────────────▼─────────────┐  │   │
-│  │  │  Vertex AI Search    │            │  Vertex AI Endpoints      │  │   │
-│  │  │  (semantic search)   │            │  (rec. model, <200ms P95) │  │   │
-│  │  └──────────────────────┘            └───────────────────────────┘  │   │
-│  │                                                                       │   │
-│  │  Vertex AI Pipelines (daily retraining) → Vertex AI Model Registry   │   │
-│  └──────────────────────────────────────────────────────────────────────┘   │
-│                                                                               │
-│  AD TECH PIPELINE                                                            │
-│  Ad Events (2M/sec) → Pub/Sub → Dataflow (streaming, 1-min windows)         │
-│                                      │                                        │
-│                         ┌────────────┴───────────────┐                       │
-│                    BigQuery                        Bigtable                   │
-│                    (analytics DW,              (fraud detection,              │
-│                     <5min latency)              <5ms lookup)                  │
-│                         │                                                     │
-│                    Looker Studio (dashboards)                                 │
-│                                                                               │
-│  OBSERVABILITY                                                                │
-│  Cloud Monitoring + Cloud Logging + Cloud Trace + Network Intelligence Center │
-│                                                                               │
-│  SECURITY                                                                     │
-│  Cloud Armor │ Cloud KMS (CMEK) │ VPC Service Controls │ IAM │ Audit Logs    │
-│                                                                               │
-│  EU GDPR: Separate project (Assured Workloads, EU-only regions)              │
-└──────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    EndUsers(("End Users (Global)"))
+
+    subgraph DELIVERY[CONTENT DELIVERY]
+        MediaCDN["Media CDN (30+ global PoPs, HLS/DASH)"]
+        CloudCDN["Cloud CDN (web assets, thumbnails)"]
+        GCS_Multi["Cloud Storage (Multi-Region: US, EU, ASIA)"]
+
+        EndUsers --> MediaCDN
+        EndUsers --> CloudCDN
+        MediaCDN -->|"cache miss: origin pull"| GCS_Multi
+        CloudCDN -->|"cache miss: origin pull"| GCS_Multi
+    end
+
+    subgraph INGESTION["CONTENT INGESTION & TRANSCODING"]
+        StudioUpload(("Studio Upload"))
+        GCS_Raw["Cloud Storage (raw)"]
+        PubSubIngest["Pub/Sub"]
+        CloudRunOrch["Cloud Run (Orchestrator)"]
+        TranscodingAPI["Transcoding API"]
+        GCS_Trans["Cloud Storage (transcoded, multi-region)"]
+
+        StudioUpload --> GCS_Raw
+        GCS_Raw --> PubSubIngest
+        PubSubIngest --> CloudRunOrch
+        CloudRunOrch --> TranscodingAPI
+        TranscodingAPI --> GCS_Trans
+    end
+
+    GCS_Trans --> GCS_Multi
+
+    subgraph AIML["AI/ML LAYER"]
+        subgraph CONTENT_INTEL[CONTENT INTELLIGENCE]
+            CloudRunEnrich["Cloud Run (Enrichment)"]
+            Gemini["Gemini 1.5 Pro (vision, tagging)"]
+            VertexSearch["Vertex AI Search (semantic search)"]
+            CloudRunEnrich --> Gemini --> VertexSearch
+        end
+
+        subgraph REC_ENGINE[RECOMMENDATION ENGINE]
+            FeatureStore["Vertex AI Feature Store (user features)"]
+            VertexEndpoints["Vertex AI Endpoints (rec model, under 200ms P95)"]
+            FeatureStore --> VertexEndpoints
+        end
+
+        VertexPipelines["Vertex AI Pipelines (daily retraining)"]
+        ModelRegistry["Vertex AI Model Registry"]
+        VertexPipelines --> ModelRegistry
+        ModelRegistry --> VertexEndpoints
+    end
+
+    GCS_Trans --> CloudRunEnrich
+
+    subgraph ADTECH["AD TECH PIPELINE"]
+        AdEvents(("Ad Events (2M/sec)"))
+        PubSubAds["Pub/Sub"]
+        DataflowAds["Dataflow (streaming, 1-min windows)"]
+        BQAds["BigQuery (analytics DW, under 5min latency)"]
+        Bigtable["Bigtable (fraud detection, under 5ms lookup)"]
+        LookerStudio["Looker Studio (dashboards)"]
+
+        AdEvents --> PubSubAds
+        PubSubAds --> DataflowAds
+        DataflowAds --> BQAds
+        DataflowAds --> Bigtable
+        BQAds --> LookerStudio
+    end
+
+    subgraph OBS[OBSERVABILITY]
+        Monitoring["Cloud Monitoring"]
+        Logging["Cloud Logging"]
+        Trace["Cloud Trace"]
+        NIC["Network Intelligence Center"]
+    end
+
+    subgraph SECGROUP[SECURITY]
+        Armor["Cloud Armor"]
+        KMS["Cloud KMS (CMEK)"]
+        VPCSvc["VPC Service Controls"]
+        IAM[IAM]
+        AuditLogs["Audit Logs"]
+    end
+
+    subgraph EU_GDPR["EU GDPR"]
+        EUProject["Separate Project (Assured Workloads, EU-only regions)"]
+    end
 ```
 
 ---

@@ -504,63 +504,90 @@ Cymbal Retail's SAP S/4HANA ERP system on-premises is the system of record for i
 
 ## 10. Architecture Diagram (Text)
 
-```
-┌────────────────────────────────────────────────────────────────────────────────┐
-│                        Cymbal Retail — GCP Architecture                        │
-├────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                 │
-│  CHANNELS                                                                       │
-│  ┌──────────┐    ┌──────────┐    ┌──────────────────────────────┐             │
-│  │  Web/SPA │    │ Mobile   │    │  1,200 Physical Stores (POS) │             │
-│  │  (CDN)   │    │  App     │    │  (Cloud Interconnect → GCP)  │             │
-│  └────┬─────┘    └────┬─────┘    └──────────────┬───────────────┘             │
-│       │               │                          │                              │
-│  ┌────▼───────────────▼──────────────────────────▼───────────────────────┐    │
-│  │  Cloud Armor (WAF) → Cloud Load Balancing (Global Anycast)            │    │
-│  │                              │                                         │    │
-│  │           Apigee API Management (Gateway, rate limiting, auth)         │    │
-│  └──────────────────────────────┬──────────────────────────────────────  ┘    │
-│                                  │                                              │
-│  ┌───────────────────────────────▼────────────────────────────────────────┐   │
-│  │  APPLICATION LAYER (cymbal-ecommerce project)                          │   │
-│  │                                                                         │   │
-│  │  ┌─────────────────────┐  ┌─────────────────────┐  ┌────────────────┐ │   │
-│  │  │  GKE Standard       │  │  Cloud Run           │  │  Loyalty Svc   │ │   │
-│  │  │  (Order, Cart,      │  │  (Catalog, Search,   │  │  Cloud Run     │ │   │
-│  │  │   User microsvcs)   │  │   Recommendations)   │  │  (Event-driven)│ │   │
-│  │  └──────────┬──────────┘  └──────────┬───────────┘  └───────┬────────┘ │   │
-│  └─────────────┼───────────────────────  ┼──────────────────────┼──────────┘   │
-│                │                          │                       │              │
-│  ┌─────────────▼──────────────────────────▼───────────────────────▼──────────┐ │
-│  │  DATA LAYER                                                                │ │
-│  │  ┌──────────────────┐  ┌───────────────────┐  ┌────────────────────────┐ │ │
-│  │  │  Cloud Spanner   │  │  Memorystore Redis │  │  Firestore             │ │ │
-│  │  │  (Inventory,     │  │  (Sessions, Cart,  │  │  (Loyalty accounts,    │ │ │
-│  │  │   Orders, SKUs)  │  │   Product cache)   │  │   User preferences)    │ │ │
-│  │  └──────────────────┘  └───────────────────┘  └────────────────────────┘ │ │
-│  └────────────────────────────────────────────────────────────────────────────┘ │
-│                                                                                 │
-│  EVENTS & REAL-TIME                                                             │
-│  Pub/Sub (inventory, loyalty, order events)                                     │
-│    → Dataflow (streaming ETL, inventory aggregation)                           │
-│    → BigQuery (analytics, demand forecasting via BigQuery ML ARIMA_PLUS)       │
-│                                                                                 │
-│  ┌──────────────────────────────────────────────────────────────────────────┐  │
-│  │  PCI SCOPE (cymbal-pci project — isolated)                               │  │
-│  │  Cloud Run (Checkout/Tokenization) → Payment Processor API               │  │
-│  │  Cloud KMS (HSM) │ VPC Service Controls │ Cloud Audit Logs               │  │
-│  └──────────────────────────────────────────────────────────────────────────┘  │
-│                                                                                 │
-│  AI/ML                                                                          │
-│  Vertex AI Search for Retail (product search + personalization)                 │
-│  Vertex AI Endpoints (recommendation model) ← Vertex AI Feature Store          │
-│  Vertex AI Pipelines (model retraining)                                         │
-│                                                                                 │
-│  ERP INTEGRATION                                                                │
-│  SAP S/4HANA (on-prem) → Cloud Interconnect → Pub/Sub → Dataflow → Spanner    │
-│                                                                                 │
-│  OBSERVABILITY: Cloud Monitoring │ Cloud Logging │ Cloud Trace │ SCC Premium   │
-└────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    WebSPA(("Web/SPA (CDN)"))
+    MobileApp((Mobile App))
+    PhysicalStores(("1,200 Physical Stores (POS)"))
+
+    WebSPA --> Armor
+    MobileApp --> Armor
+    PhysicalStores -->|"Cloud Interconnect"| Armor
+
+    Armor["Cloud Armor (WAF) + Cloud Load Balancing (Global Anycast)"]
+    Armor --> Apigee
+
+    Apigee["Apigee API Management (Gateway, rate limiting, auth)"]
+
+    subgraph APPCORE["APPLICATION LAYER (cymbal-ecommerce project)"]
+        GKEStd["GKE Standard (Order, Cart, User microservices)"]
+        CloudRunApp["Cloud Run (Catalog, Search, Recommendations)"]
+        LoyaltySvc["Cloud Run — Loyalty Service (Event-driven)"]
+    end
+
+    Apigee --> GKEStd
+    Apigee --> CloudRunApp
+    Apigee --> LoyaltySvc
+
+    subgraph DATALAYER[DATA LAYER]
+        Spanner["Cloud Spanner (Inventory, Orders, SKUs)"]
+        Redis["Memorystore Redis (Sessions, Cart, Product cache)"]
+        FSRetail["Firestore (Loyalty accounts, User preferences)"]
+    end
+
+    GKEStd --> Spanner
+    GKEStd --> Redis
+    CloudRunApp --> Redis
+    LoyaltySvc --> FSRetail
+
+    subgraph EVENTS["EVENTS & REAL-TIME"]
+        PubSubEvents["Pub/Sub (inventory, loyalty, order events)"]
+        DataflowEvents["Dataflow (streaming ETL, inventory aggregation)"]
+        BigQueryAnalytics["BigQuery (analytics, demand forecasting via BQML ARIMA_PLUS)"]
+
+        PubSubEvents --> DataflowEvents --> BigQueryAnalytics
+    end
+
+    GKEStd --> PubSubEvents
+    LoyaltySvc --> PubSubEvents
+
+    subgraph PCI["PCI SCOPE (cymbal-pci project — isolated)"]
+        CheckoutRun["Cloud Run (Checkout/Tokenization)"]
+        PaymentProc["Payment Processor API"]
+        PCIKMS["Cloud KMS (HSM)"]
+        PCIVPCSvc["VPC Service Controls"]
+        PCIAudit["Cloud Audit Logs"]
+
+        CheckoutRun --> PaymentProc
+    end
+
+    Apigee --> CheckoutRun
+
+    subgraph AIML[AI/ML]
+        VertexSearchRetail["Vertex AI Search for Retail (product search + personalization)"]
+        VertexEndpoints["Vertex AI Endpoints (recommendation model)"]
+        VertexFeatureStore["Vertex AI Feature Store"]
+        VertexPipelines["Vertex AI Pipelines (model retraining)"]
+
+        VertexFeatureStore --> VertexEndpoints
+        VertexPipelines --> VertexEndpoints
+    end
+
+    subgraph ERP[ERP INTEGRATION]
+        SAP["SAP S/4HANA (on-prem)"]
+        InterconnectERP["Cloud Interconnect"]
+        PubSubERP["Pub/Sub"]
+        DataflowERP["Dataflow"]
+
+        SAP --> InterconnectERP --> PubSubERP --> DataflowERP --> Spanner
+    end
+
+    subgraph OBS[OBSERVABILITY]
+        Monitoring["Cloud Monitoring"]
+        Logging["Cloud Logging"]
+        Trace["Cloud Trace"]
+        SCCPremium["SCC Premium"]
+    end
 ```
 
 ---

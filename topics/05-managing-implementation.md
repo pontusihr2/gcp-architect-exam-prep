@@ -21,24 +21,33 @@ This domain covers the practical implementation of solutions: CI/CD pipelines, d
 ## 5.2 CI/CD with Cloud Build and Cloud Deploy
 
 ### CI/CD Pipeline Architecture
-```
-Developer push to GitHub/GitLab/Bitbucket
-    ↓
-Cloud Build Trigger (push to main or PR)
-    ↓
-Cloud Build Pipeline:
-  Step 1: Install dependencies
-  Step 2: Run unit tests
-  Step 3: Run integration tests
-  Step 4: Build container image
-  Step 5: Scan for vulnerabilities (Artifact Registry)
-  Step 6: Sign image (Binary Authorization)
-  Step 7: Push to Artifact Registry
-    ↓
-Cloud Deploy Pipeline:
-  Stage 1: Deploy to dev
-  Stage 2: Deploy to staging (with approval gate)
-  Stage 3: Deploy to prod (with manual approval)
+```mermaid
+flowchart TD
+    Dev["Developer push to GitHub/GitLab/Bitbucket"]
+    Trigger["Cloud Build Trigger (push to main or PR)"]
+
+    Dev --> Trigger
+
+    subgraph CB["Cloud Build Pipeline"]
+        S1["Step 1: Install dependencies"]
+        S2["Step 2: Run unit tests"]
+        S3["Step 3: Run integration tests"]
+        S4["Step 4: Build container image"]
+        S5["Step 5: Scan for vulnerabilities (Artifact Registry)"]
+        S6["Step 6: Sign image (Binary Authorization)"]
+        S7["Step 7: Push to Artifact Registry"]
+        S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7
+    end
+
+    subgraph CD["Cloud Deploy Pipeline"]
+        D1["Stage 1: Deploy to dev"]
+        D2["Stage 2: Deploy to staging (with approval gate)"]
+        D3["Stage 3: Deploy to prod (with manual approval)"]
+        D1 --> D2 --> D3
+    end
+
+    Trigger --> S1
+    S7 --> D1
 ```
 
 ### Cloud Build Deep Dive

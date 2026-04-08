@@ -537,73 +537,105 @@ KnightMotives' digital twin simulations currently take 3–5 days to complete on
 
 ## 10. Architecture Diagram (Text)
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                    KnightMotives Automotive — GCP Architecture                  │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                  │
-│  VEHICLES (3.2M globally)                                                       │
-│  ┌──────────────────────────────────────────────────────────────────────────┐  │
-│  │  MQTT / HTTPS / gRPC — TLS 1.3 + X.509 mTLS (CAS-issued certs)         │  │
-│  └────────────────────────────┬─────────────────────────────────────────────┘  │
-│                                │                                                 │
-│  ┌─────────────────────────────▼───────────────────────────────────────────┐   │
-│  │  TELEMATICS INGESTION (km-telematics project)                            │   │
-│  │                                                                           │   │
-│  │  Cloud Load Balancing (Global Anycast)                                   │   │
-│  │       │                                                                   │   │
-│  │  MQTT Bridge (Cloud Run) / Direct Pub/Sub publish                        │   │
-│  │       │                                                                   │   │
-│  │  Pub/Sub (telematics-raw)  ←── 640M data points/sec                     │   │
-│  │       │                                                                   │   │
-│  │  Dataflow Streaming Pipeline                                              │   │
-│  │  ├── Decode / validate / enrich                                           │   │
-│  │  ├── Critical event detection → Pub/Sub (alerts) → Cloud Run (alerts)   │   │
-│  │  ├─→ Bigtable (hot, 90 days, row key: vehicleId#revTimestamp)           │   │
-│  │  └─→ BigQuery (cold analytics, partitioned by date)                     │   │
-│  └─────────────────────────────────────────────────────────────────────────┘   │
-│                                                                                  │
-│  OTA UPDATE PIPELINE (km-ota project)                                           │
-│  Cloud Build → KMS-signed package → Artifact Registry → Cloud Storage          │
-│  Cloud Run (Campaign Manager): Staged rollout 0.1%→1%→10%→50%→100%            │
-│  Health monitor → auto-rollback if fault rate > 0.5%                           │
-│  Cloud Spanner (immutable audit log) ← UN R156 compliance                      │
-│  Media CDN → vehicles download updates globally                                 │
-│                                                                                  │
-│  ML PLATFORM (km-ml project)                                                    │
-│  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │  BigQuery (telematics history + maintenance records)                     │   │
-│  │       │                                                                   │   │
-│  │  Vertex AI Feature Store (vehicle features)                              │   │
-│  │       │                                                                   │   │
-│  │  Vertex AI Pipelines (daily retraining)                                  │   │
-│  │  → Vertex AI Training (TPU v4 / GPU)                                    │   │
-│  │  → Vertex AI Model Registry                                              │   │
-│  │  → Vertex AI Batch Prediction (3.2M vehicles/day)                       │   │
-│  │  → BigQuery (predictions) → KnightConnect App (Cloud Run)               │   │
-│  └─────────────────────────────────────────────────────────────────────────┘   │
-│                                                                                  │
-│  DIGITAL TWINS (km-twins project)                                               │
-│  Bigtable (real-time state) → Cloud Spanner (twin snapshots)                   │
-│  GKE Autopilot / Vertex AI Training (C++ simulation containers)                │
-│  BigQuery (simulation results) → Looker Studio                                  │
-│                                                                                  │
-│  SECURITY & COMPLIANCE                                                           │
-│  Certificate Authority Service (X.509 certs, 10M scale)                        │
-│  Cloud KMS (CMEK + OTA package signing, asymmetric RSA-4096)                   │
-│  VPC Service Controls (telematics + ML project perimeter)                       │
-│  Security Command Center Premium (UN R155 threat monitoring)                    │
-│  Cloud Audit Logs → Cloud Storage locked bucket (10-year retention)             │
-│                                                                                  │
-│  DATA RESIDENCY                                                                  │
-│  EU vehicles: Pub/Sub → Dataflow → Bigtable (eu project, Assured Workloads)    │
-│  Anonymized aggregates → global BigQuery (ML training)                          │
-│                                                                                  │
-│  OBSERVABILITY                                                                   │
-│  Cloud Monitoring (vehicle fleet health, OTA progress dashboards)               │
-│  Cloud Logging (centralized from all projects)                                  │
-│  Cloud Trace (latency tracing: telematics → alert pipeline)                    │
-└─────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Vehicles(("Vehicles (3.2M globally)"))
+
+    Vehicles -->|"MQTT/HTTPS/gRPC TLS 1.3 + X.509 mTLS (CAS-issued)"| CLB
+
+    subgraph TELEMATICS["TELEMATICS INGESTION (km-telematics project)"]
+        CLB["Cloud Load Balancing (Global Anycast)"]
+        MQTTBridge["MQTT Bridge (Cloud Run) / Direct Pub/Sub publish"]
+        PubSubRaw["Pub/Sub (telematics-raw, 640M data points/sec)"]
+        DataflowStream["Dataflow Streaming Pipeline (decode, validate, enrich)"]
+        PubSubAlerts["Pub/Sub (alerts)"]
+        CloudRunAlerts["Cloud Run (alerts)"]
+        Bigtable["Bigtable (hot, 90 days, vehicleId#revTimestamp)"]
+        BigQueryCold["BigQuery (cold analytics, partitioned by date)"]
+
+        CLB --> MQTTBridge
+        MQTTBridge --> PubSubRaw
+        PubSubRaw --> DataflowStream
+        DataflowStream -->|"critical event detection"| PubSubAlerts
+        PubSubAlerts --> CloudRunAlerts
+        DataflowStream --> Bigtable
+        DataflowStream --> BigQueryCold
+    end
+
+    subgraph OTA["OTA UPDATE PIPELINE (km-ota project)"]
+        CloudBuild["Cloud Build"]
+        ArtifactRegistry["Artifact Registry"]
+        GCS_OTA["Cloud Storage (OTA packages)"]
+        CampaignMgr["Cloud Run (Campaign Manager) — staged rollout 0.1% to 100%"]
+        HealthMonitor{"Health Monitor: fault rate over 0.5%?"}
+        SpannerAudit["Cloud Spanner (immutable audit log, UN R156)"]
+        MediaCDN_OTA["Media CDN (global distribution)"]
+
+        CloudBuild -->|"KMS-signed package"| ArtifactRegistry
+        ArtifactRegistry --> GCS_OTA
+        GCS_OTA --> CampaignMgr
+        CampaignMgr --> HealthMonitor
+        HealthMonitor -->|healthy| MediaCDN_OTA
+        HealthMonitor -->|"auto-rollback"| CampaignMgr
+        CampaignMgr --> SpannerAudit
+    end
+
+    MediaCDN_OTA -->|"vehicles download updates"| Vehicles
+
+    subgraph MLPLATFORM["ML PLATFORM (km-ml project)"]
+        BQHistory["BigQuery (telematics history + maintenance records)"]
+        VertexFS["Vertex AI Feature Store (vehicle features)"]
+        VertexPipelines["Vertex AI Pipelines (daily retraining)"]
+        VertexTraining["Vertex AI Training (TPU v4/GPU)"]
+        ModelRegistry["Vertex AI Model Registry"]
+        VertexBatch["Vertex AI Batch Prediction (3.2M vehicles/day)"]
+        BQPredictions["BigQuery (predictions)"]
+        KnightConnect["KnightConnect App (Cloud Run)"]
+
+        BQHistory --> VertexFS
+        VertexFS --> VertexPipelines
+        VertexPipelines --> VertexTraining
+        VertexTraining --> ModelRegistry
+        ModelRegistry --> VertexBatch
+        VertexBatch --> BQPredictions
+        BQPredictions --> KnightConnect
+    end
+
+    BigQueryCold --> BQHistory
+
+    subgraph TWINS["DIGITAL TWINS (km-twins project)"]
+        BigtableTwins["Bigtable (real-time state)"]
+        SpannerTwins["Cloud Spanner (twin snapshots)"]
+        SimContainers["GKE Autopilot / Vertex AI Training (C++ simulation containers)"]
+        BQSimResults["BigQuery (simulation results)"]
+        LookerStudio["Looker Studio"]
+
+        BigtableTwins --> SpannerTwins
+        SpannerTwins --> SimContainers
+        SimContainers --> BQSimResults
+        BQSimResults --> LookerStudio
+    end
+
+    Bigtable -.->|"real-time state feed"| BigtableTwins
+
+    subgraph SECURITY["SECURITY & COMPLIANCE"]
+        CAS["Certificate Authority Service (X.509 certs, 10M scale)"]
+        KMS["Cloud KMS (CMEK + OTA package signing, RSA-4096)"]
+        VPCSvc["VPC Service Controls (telematics + ML project perimeter)"]
+        SCCPrem["Security Command Center Premium (UN R155 threat monitoring)"]
+        AuditLogs["Cloud Audit Logs to Cloud Storage (locked bucket, 10yr retention)"]
+    end
+
+    subgraph DATARESIDENCY["DATA RESIDENCY"]
+        EUFlow["EU vehicles: Pub/Sub to Dataflow to Bigtable (Assured Workloads)"]
+        GlobalBQ["Anonymized aggregates to global BigQuery (ML training)"]
+    end
+
+    subgraph OBS[OBSERVABILITY]
+        Monitoring["Cloud Monitoring (fleet health, OTA dashboards)"]
+        Logging["Cloud Logging (centralized from all projects)"]
+        Trace["Cloud Trace (telematics to alert pipeline)"]
+    end
 ```
 
 ---

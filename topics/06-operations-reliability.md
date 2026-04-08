@@ -90,18 +90,19 @@ Error budget consumption rate:
 | **Hot standby (Active-Active)** | Traffic served from multiple regions simultaneously | Near-zero | Zero | Highest |
 
 ### DR Architecture Decision Framework
-```
-What is the RTO requirement?
-  > 4 hours → Cold standby (backups to Cloud Storage + restore scripts)
-  1–4 hours → Warm standby / pilot light (replicated DB, IaC to rebuild compute)
-  < 1 hour  → Active-passive (full replica, automatic failover)
-  < 5 min   → Active-active (global load balancing, multi-region databases)
+```mermaid
+flowchart TD
+    RTO["What is the RTO requirement?"]
+    RTO -->|"> 4 hours"| RTO1["Cold standby (backups to Cloud Storage + restore scripts)"]
+    RTO -->|"1–4 hours"| RTO2["Warm standby / pilot light (replicated DB, IaC to rebuild compute)"]
+    RTO -->|"< 1 hour"| RTO3["Active-passive (full replica, automatic failover)"]
+    RTO -->|"< 5 min"| RTO4["Active-active (global load balancing, multi-region databases)"]
 
-What is the RPO requirement?
-  > 1 hour  → Scheduled backups (Cloud SQL automated backups)
-  < 1 hour  → Continuous replication (Cloud SQL read replicas with PITR)
-  < 1 min   → Synchronous replication (Cloud Spanner multi-region)
-  Zero      → Active-active with synchronous writes (Spanner, Bigtable)
+    RPO["What is the RPO requirement?"]
+    RPO -->|"> 1 hour"| RPO1["Scheduled backups (Cloud SQL automated backups)"]
+    RPO -->|"< 1 hour"| RPO2["Continuous replication (Cloud SQL read replicas with PITR)"]
+    RPO -->|"< 1 min"| RPO3["Synchronous replication (Cloud Spanner multi-region)"]
+    RPO -->|"Zero"| RPO4["Active-active with synchronous writes (Spanner, Bigtable)"]
 ```
 
 ### Regional vs Global DR
