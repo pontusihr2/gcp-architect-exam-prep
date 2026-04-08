@@ -96,7 +96,7 @@ This is the **highest-weight domain** and the conceptual heart of the exam. Focu
   - Migration Center, Migrate for Compute Engine
   - Database Migration Service (DMS)
 
-📁 Study notes: [`topics/domain-1-design-planning.md`](topics/domain-1-design-planning.md)
+📁 Study notes: [`topics/01-designing-planning-architecture.md`](topics/01-designing-planning-architecture.md)
 
 ---
 
@@ -120,7 +120,7 @@ This is the **highest-weight domain** and the conceptual heart of the exam. Focu
   - Config Management, Policy Controller
   - Service Mesh (Cloud Service Mesh / Istio)
 
-📁 Study notes: [`topics/domain-2-provisioning.md`](topics/domain-2-provisioning.md)
+📁 Study notes: [`topics/02-managing-provisioning-infrastructure.md`](topics/02-managing-provisioning-infrastructure.md)
 
 ---
 
@@ -148,7 +148,7 @@ This is the **highest-weight domain** and the conceptual heart of the exam. Focu
   - Compliance frameworks: PCI DSS, HIPAA BAA, ISO 27001, SOC 2 on GCP
   - Access Transparency, Access Approval
 
-📁 Study notes: [`topics/domain-3-security.md`](topics/domain-3-security.md)
+📁 Study notes: [`topics/03-security-compliance.md`](topics/03-security-compliance.md)
 
 ---
 
@@ -175,7 +175,7 @@ This is the **highest-weight domain** and the conceptual heart of the exam. Focu
   - Chaos engineering concepts on GCP
   - A/B testing with Traffic Director or Cloud Run traffic splitting
 
-📁 Study notes: [`topics/domain-4-optimization.md`](topics/domain-4-optimization.md)
+📁 Study notes: [`topics/04-optimizing-processes.md`](topics/04-optimizing-processes.md)
 
 ---
 
@@ -195,7 +195,7 @@ This is the **highest-weight domain** and the conceptual heart of the exam. Focu
   - Transfer Appliance for large offline migrations
   - BigQuery Data Transfer Service (SaaS sources)
 
-📁 Study notes: [`topics/domain-5-implementation.md`](topics/domain-5-implementation.md)
+📁 Study notes: [`topics/05-managing-implementation.md`](topics/05-managing-implementation.md)
 
 ---
 
@@ -219,7 +219,7 @@ This is the **highest-weight domain** and the conceptual heart of the exam. Focu
   - Cloud Service Mesh (Istio) telemetry
   - Distributed tracing with OpenTelemetry on GCP
 
-📁 Study notes: [`topics/domain-6-reliability.md`](topics/domain-6-reliability.md)
+📁 Study notes: [`topics/06-operations-reliability.md`](topics/06-operations-reliability.md)
 
 ---
 
@@ -315,7 +315,7 @@ The exam includes questions tied to **4 official case studies**. You **must** re
 - **Connectivity:** Dedicated Interconnect / Cross-Cloud Interconnect (manufacturing plant connectivity), Partner Interconnect
 - **Security:** VPC Service Controls, CMEK, Workload Identity
 
-📁 Deep dive: [`case-studies/knight-motives-automotive.md`](case-studies/knight-motives-automotive.md)
+📁 Deep dive: [`case-studies/knightmotives-automotive.md`](case-studies/knightmotives-automotive.md)
 
 ---
 
@@ -327,44 +327,44 @@ gcp-architect-exam-prep/
 ├── README.md                          ← You are here
 │
 ├── topics/                            ← Domain-by-domain study notes
-│   ├── domain-1-design-planning.md
-│   ├── domain-2-provisioning.md
-│   ├── domain-3-security.md
-│   ├── domain-4-optimization.md
-│   ├── domain-5-implementation.md
-│   └── domain-6-reliability.md
+│   ├── 01-designing-planning-architecture.md
+│   ├── 02-managing-provisioning-infrastructure.md
+│   ├── 03-security-compliance.md
+│   ├── 04-optimizing-processes.md
+│   ├── 05-managing-implementation.md
+│   └── 06-operations-reliability.md
 │
-├── services/                          ← Per-service deep dives & decision trees
-│   ├── compute/                       # GCE, GKE, Cloud Run, App Engine, Cloud Functions
-│   ├── networking/                    # VPC, LB, CDN, Interconnect, DNS, Cloud Armor
-│   ├── storage-databases/             # GCS, Cloud SQL, Spanner, Bigtable, Firestore, AlloyDB
-│   ├── data-analytics/                # BigQuery, Dataflow, Dataproc, Pub/Sub, Composer
-│   ├── security/                      # IAM, KMS, SCC, VPC-SC, DLP, Secret Manager
-│   ├── ai-ml/                         # Vertex AI, AutoML, Gemini on Vertex
-│   └── operations/                    # Cloud Monitoring, Logging, Trace, Profiler
+├── services/                          ← Per-service deep dives & decision tables
+│   ├── compute.md                     # GCE, GKE, Cloud Run, App Engine, Cloud Functions
+│   ├── networking.md                  # VPC, LB, CDN, Interconnect, DNS, Cloud Armor
+│   ├── storage.md                     # GCS, Persistent Disk, Filestore
+│   ├── databases.md                   # Cloud SQL, Spanner, Bigtable, Firestore, AlloyDB
+│   ├── bigdata-analytics.md           # BigQuery, Dataflow, Dataproc, Pub/Sub, Composer
+│   ├── security-services.md           # IAM, KMS, SCC, VPC-SC, DLP, Secret Manager
+│   ├── ai-ml.md                       # Vertex AI, AutoML, Gemini on Vertex
+│   └── devops.md                      # Cloud Build, Cloud Deploy, Artifact Registry
 │
 ├── case-studies/                      ← Official case study analysis
 │   ├── ehr-healthcare.md
 │   ├── altostrat-media.md
 │   ├── cymbal-retail.md
-│   └── knight-motives-automotive.md
+│   └── knightmotives-automotive.md
 │
-├── cheat-sheets/                      ← One-page quick reference cards
-│   ├── storage-decision-tree.md       # When to use which storage product
-│   ├── compute-decision-tree.md       # When to use which compute product
-│   ├── network-ports-protocols.md     # Firewall rules, ports cheat sheet
-│   ├── iam-roles-reference.md         # Common predefined roles by service
-│   ├── dr-patterns.md                 # RPO/RTO patterns (cold/warm/hot)
-│   └── pricing-cost-levers.md        # CUDs, SUDs, Spot, BigQuery pricing
+├── cheat-sheets/                      ← Quick reference cards
+│   ├── decision-trees.md              # Compute, DB, storage, network, data, migration, DR
+│   ├── services-comparison.md         # Side-by-side service comparison tables
+│   ├── iam-cheatsheet.md              # IAM hierarchy, roles, conditions, org policies
+│   ├── networking-cheatsheet.md       # VPC, firewall, LB, hybrid connectivity
+│   └── key-terms.md                   # RTO/RPO, SLI/SLO, CAP theorem, glossary
 │
 ├── practice-questions/                ← Practice Q&A bank
-│   ├── domain-1-questions.md
-│   ├── domain-2-questions.md
-│   ├── domain-3-questions.md
-│   ├── domain-4-questions.md
-│   ├── domain-5-questions.md
-│   ├── domain-6-questions.md
-│   └── full-mock-exam-1.md
+│   ├── domain-1-architecture.md
+│   ├── domain-2-infrastructure.md
+│   ├── domain-3-security.md
+│   ├── domain-4-processes.md
+│   ├── domain-5-implementation.md
+│   ├── domain-6-reliability.md
+│   └── case-study-questions.md
 │
 └── resources/
     └── official-links.md              ← Curated links (official docs, labs, whitepapers)
@@ -451,20 +451,21 @@ gcp-architect-exam-prep/
 | Resource | Path |
 |---|---|
 | Official resources & links | [`resources/official-links.md`](resources/official-links.md) |
-| Domain 1 — Design & Planning | [`topics/domain-1-design-planning.md`](topics/domain-1-design-planning.md) |
-| Domain 2 — Provisioning | [`topics/domain-2-provisioning.md`](topics/domain-2-provisioning.md) |
-| Domain 3 — Security | [`topics/domain-3-security.md`](topics/domain-3-security.md) |
-| Domain 4 — Optimization | [`topics/domain-4-optimization.md`](topics/domain-4-optimization.md) |
-| Domain 5 — Implementation | [`topics/domain-5-implementation.md`](topics/domain-5-implementation.md) |
-| Domain 6 — Reliability | [`topics/domain-6-reliability.md`](topics/domain-6-reliability.md) |
+| Domain 1 — Design & Planning | [`topics/01-designing-planning-architecture.md`](topics/01-designing-planning-architecture.md) |
+| Domain 2 — Provisioning | [`topics/02-managing-provisioning-infrastructure.md`](topics/02-managing-provisioning-infrastructure.md) |
+| Domain 3 — Security | [`topics/03-security-compliance.md`](topics/03-security-compliance.md) |
+| Domain 4 — Optimization | [`topics/04-optimizing-processes.md`](topics/04-optimizing-processes.md) |
+| Domain 5 — Implementation | [`topics/05-managing-implementation.md`](topics/05-managing-implementation.md) |
+| Domain 6 — Reliability | [`topics/06-operations-reliability.md`](topics/06-operations-reliability.md) |
 | EHR Healthcare case study | [`case-studies/ehr-healthcare.md`](case-studies/ehr-healthcare.md) |
 | Altostrat Media case study | [`case-studies/altostrat-media.md`](case-studies/altostrat-media.md) |
 | Cymbal Retail case study | [`case-studies/cymbal-retail.md`](case-studies/cymbal-retail.md) |
-| KnightMotives Automotive case study | [`case-studies/knight-motives-automotive.md`](case-studies/knight-motives-automotive.md) |
-| Storage decision tree | [`cheat-sheets/storage-decision-tree.md`](cheat-sheets/storage-decision-tree.md) |
-| Compute decision tree | [`cheat-sheets/compute-decision-tree.md`](cheat-sheets/compute-decision-tree.md) |
-| IAM roles reference | [`cheat-sheets/iam-roles-reference.md`](cheat-sheets/iam-roles-reference.md) |
-| DR patterns cheat sheet | [`cheat-sheets/dr-patterns.md`](cheat-sheets/dr-patterns.md) |
+| KnightMotives Automotive case study | [`case-studies/knightmotives-automotive.md`](case-studies/knightmotives-automotive.md) |
+| All decision trees (compute, DB, storage, network, data, migration, DR) | [`cheat-sheets/decision-trees.md`](cheat-sheets/decision-trees.md) |
+| IAM cheat sheet | [`cheat-sheets/iam-cheatsheet.md`](cheat-sheets/iam-cheatsheet.md) |
+| Networking cheat sheet | [`cheat-sheets/networking-cheatsheet.md`](cheat-sheets/networking-cheatsheet.md) |
+| Services comparison | [`cheat-sheets/services-comparison.md`](cheat-sheets/services-comparison.md) |
+| Key terms & glossary | [`cheat-sheets/key-terms.md`](cheat-sheets/key-terms.md) |
 | Practice questions (all domains) | [`practice-questions/`](practice-questions/) |
 
 ---
