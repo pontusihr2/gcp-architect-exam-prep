@@ -8,6 +8,7 @@
 ## 📋 Table of Contents
 
 - [Official Google Certification Links](#-official-google-certification-links)
+- [Online Practice Exams](#-online-practice-exams)
 - [Google Cloud Documentation by Domain](#-google-cloud-documentation-by-domain)
   - [Compute](#compute)
   - [Networking](#networking)
@@ -21,7 +22,7 @@
 - [Google Cloud Skills Boost (Qwiklabs) — Free Learning Paths](#-google-cloud-skills-boost-qwiklabs--free-learning-paths)
 - [Official Whitepapers & Architecture Frameworks](#-official-whitepapers--architecture-frameworks)
 - [Google Cloud YouTube Resources](#-google-cloud-youtube-resources)
-- [Community & Third-Party Practice Resources](#-community--third-party-practice-resources)
+- [Community Forums & Structured Courses](#-community-forums--structured-courses)
 - [Recommended Books](#-recommended-books)
 
 ---
@@ -37,9 +38,27 @@
 | **Certification FAQ** | <https://cloud.google.com/learn/certification/faqs> | Policies, reschedule, accessibility accommodations |
 | **Kryterion scheduling** | <https://www.webassessor.com/googlecloud/> | Book/reschedule your exam slot here |
 | **Google Cloud Skills Boost** | <https://www.cloudskillsboost.google/> | Official lab platform (Qwiklabs) — free tier available **[Login]** |
+| **Cloud Architect learning path** | <https://www.skills.google/paths/12> | Official Google Skills learning path with labs and exam-prep material **[Login]** |
+| **Practice exam announcement** | <https://cloud.google.com/blog/products/gcp/now-live-online-practice-exam-for-cloud> | Google Cloud blog post for the online practice exam rollout |
 | **Google Cloud blog** | <https://cloud.google.com/blog> | New service announcements relevant to exam updates |
 | **Google Cloud architecture center** | <https://cloud.google.com/architecture> | Reference architectures for all major patterns |
 | **Solutions library** | <https://cloud.google.com/solutions> | Industry and use-case solution guides |
+
+---
+
+## 📝 Online Practice Exams
+
+> Prioritize the official Google sample questions first, then use third-party practice exams to find weak areas. Avoid braindumps and always verify answers against official documentation.
+
+| Provider | URL | Notes | Cost |
+|---|---|---|---|
+| **Official sample questions** | <https://docs.google.com/forms/d/e/1FAIpQLSf54f7FbtSJcXUY6-DUHfBG31jZ3pujgb8-a5io_9biJsNpqg/viewform> | Best source for question style and wording | Free |
+| **Google Skills learning path** | <https://www.skills.google/paths/12> | Official Google path with labs and practice-oriented prep **[Login]** | Free / paid labs |
+| **CloudJobs** | <https://cloudjobs.io/study/gcp-practice-tests> | Free browser-based GCP practice tests, including PCA coverage | Free |
+| **Tutorials Dojo** | <https://portal.tutorialsdojo.com/courses/google-certified-professional-cloud-architect-practice-exams/> | Timed, review, and section-based exam modes with explanations | Paid |
+| **Whizlabs** | <https://www.whizlabs.com/google-cloud-certified-professional-cloud-architect/> | Practice tests plus labs and exam-style scenario questions | Paid |
+| **Certification Practice** | <https://certificationpractice.com/practice-exams/google-cloud-professional-cloud-architect> | Multiple timed practice sets and score tracking | Free |
+| **MeasureUp** | <https://www.measureup.com/google-cloud.html> | Official practice test partner; closest to real-exam style | Paid |
 
 ---
 
@@ -305,21 +324,9 @@
 
 ---
 
-## 👥 Community & Third-Party Practice Resources
+## 👥 Community Forums & Structured Courses
 
-> ⚠️ **Disclaimer:** Third-party practice questions are **not** endorsed by Google. Quality varies; some "brain dump" sites may contain inaccurate or outdated answers. Always verify answers against official documentation. Using braindumps violates Google's certification policies — use for *understanding concepts*, not memorizing answers verbatim.
-
-### Practice Exam Providers (Recommended)
-
-| Provider | URL | Notes | Cost |
-|---|---|---|---|
-| **TutorialsDojo** | <https://tutorialsdojo.com/courses/google-certified-professional-cloud-architect/> | High-quality, well-explained; cheat sheets included | ~$15–20 |
-| **Whizlabs** | <https://www.whizlabs.com/google-cloud-certified-professional-cloud-architect/> | Large question bank, detailed explanations | ~$20–30 |
-| **Udemy (various authors)** | Search "Professional Cloud Architect practice exam" on Udemy | Look for courses with 4.5+ stars, 2024–2025 updated | ~$10–15 (sale) |
-| **MeasureUp** | <https://www.measureup.com/google-cloud.html> | Official partner — closest to real exam difficulty | ~$99 |
-| **ExamTopics** | <https://www.examtopics.com/exams/google/professional-cloud-architect/> | Free community-contributed questions ⚠️ verify answers! | Free (limited) |
-
-> 💡 **Target score:** Achieve **≥ 75–80%** consistently on practice exams before booking your real exam date. A score of 70–74% on practice tests typically indicates borderline readiness.
+> Use the online practice exam links above for testing. This section focuses on discussion spaces and structured courses that complement practice questions.
 
 ### Community Forums & Study Groups
 

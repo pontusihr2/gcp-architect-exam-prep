@@ -451,6 +451,7 @@ gcp-architect-exam-prep/
 | Resource | Path |
 |---|---|
 | Official resources & links | [`resources/official-links.md`](resources/official-links.md) |
+| Online practice exams | [`resources/official-links.md#-online-practice-exams`](resources/official-links.md#-online-practice-exams) |
 | Domain 1 — Design & Planning | [`topics/01-designing-planning-architecture.md`](topics/01-designing-planning-architecture.md) |
 | Domain 2 — Provisioning | [`topics/02-managing-provisioning-infrastructure.md`](topics/02-managing-provisioning-infrastructure.md) |
 | Domain 3 — Security | [`topics/03-security-compliance.md`](topics/03-security-compliance.md) |
