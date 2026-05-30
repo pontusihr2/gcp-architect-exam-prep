@@ -7,6 +7,12 @@
 
 This collection of **77 practice questions** is organized by the six exam domains. Questions are written at PCA difficulty — scenario-based, requiring you to weigh tradeoffs rather than recall facts.
 
+This directory also includes a **self-contained 100-question interactive exam**:
+
+- Open `/practice-questions/practice-exam-100.html` in any modern browser
+- Select an answer for each question to immediately see why your selected answer is correct or incorrect
+- The exam is fully offline/self-contained (no Copilot, no external AI/service calls)
+
 ---
 
 ## Exam Domain Breakdown

@@ -364,7 +364,8 @@ gcp-architect-exam-prep/
 │   ├── domain-4-processes.md
 │   ├── domain-5-implementation.md
 │   ├── domain-6-reliability.md
-│   └── case-study-questions.md
+│   ├── case-study-questions.md
+│   └── practice-exam-100.html         # Self-contained interactive 100-question exam
 │
 └── resources/
     └── official-links.md              ← Curated links (official docs, labs, whitepapers)
@@ -468,6 +469,7 @@ gcp-architect-exam-prep/
 | Services comparison | [`cheat-sheets/services-comparison.md`](cheat-sheets/services-comparison.md) |
 | Key terms & glossary | [`cheat-sheets/key-terms.md`](cheat-sheets/key-terms.md) |
 | Practice questions (all domains) | [`practice-questions/`](practice-questions/) |
+| Self-contained 100-question practice exam | [`practice-questions/practice-exam-100.html`](practice-questions/practice-exam-100.html) |
 
 ---
 

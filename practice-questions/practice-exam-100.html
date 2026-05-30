@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Professional Cloud Architect Practice Exam (100 Questions)</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --ok: #166534;
+      --bad: #991b1b;
+      --accent: #2563eb;
+      --border: #dbe3ef;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --ok: #4ade80;
+        --bad: #f87171;
+        --accent: #60a5fa;
+        --border: #334155;
+      }
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .container {
+      max-width: 920px;
+      margin: 2rem auto;
+      padding: 0 1rem 2rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.45rem;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: .8rem;
+    }
+    .question {
+      font-size: 1.05rem;
+      margin-bottom: .9rem;
+    }
+    .options {
+      display: grid;
+      gap: .55rem;
+    }
+    .opt {
+      text-align: left;
+      width: 100%;
+      padding: .7rem .75rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .opt:hover {
+      border-color: var(--accent);
+    }
+    .opt[disabled] {
+      cursor: default;
+      opacity: .95;
+    }
+    .opt.correct {
+      border-color: var(--ok);
+    }
+    .opt.incorrect {
+      border-color: var(--bad);
+    }
+    .feedback {
+      margin-top: 1rem;
+      padding: .75rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(148, 163, 184, 0.08);
+    }
+    .feedback.ok {
+      border-color: var(--ok);
+    }
+    .feedback.bad {
+      border-color: var(--bad);
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+      gap: .6rem;
+    }
+    button.nav {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .55rem .8rem;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+    }
+    button.nav:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: .6rem;
+      margin-top: 1rem;
+    }
+    .pill {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .55rem .65rem;
+      background: var(--card);
+      font-size: .92rem;
+    }
+    progress {
+      width: 100%;
+      height: 12px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>Google Cloud Professional Cloud Architect — Practice Exam</h1>
+      <p class="meta">
+        Self-contained 100-question exam. No external APIs, Copilot, or any external AI/services are used at runtime.
+      </p>
+      <div id="app"></div>
+    </section>
+  </main>
+  <script>
+    const domainBlueprints = [
+      {
+        name: "Solution design",
+        count: 13,
+        templates: [
+          {
+            question: "A global retail app needs strongly consistent multi-region inventory updates with minimal operations. Which datastore is best?",
+            options: ["Cloud SQL read replicas", "Cloud Spanner multi-region", "Firestore Datastore mode", "Bigtable replication"],
+            correctIndex: 1,
+            explanations: [
+              "Cloud SQL replicas are asynchronous and not suited to globally consistent active-active writes.",
+              "Correct. Cloud Spanner offers global consistency, multi-region design, and managed operations.",
+              "Datastore mode is NoSQL and not ideal for relational transactional inventory control.",
+              "Bigtable is excellent for key-value scale but not for relational transactional workflows."
+            ]
+          },
+          {
+            question: "A small team needs stateless HTTP services with burst traffic and scale-to-zero behavior. Best platform?",
+            options: ["Cloud Run", "GKE Standard", "Managed Instance Group on Compute Engine", "App Engine flexible with custom VM"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Cloud Run provides serverless containers, autoscaling, and scale-to-zero with low ops overhead.",
+              "GKE works but requires cluster operations not needed for this requirement.",
+              "MIGs require VM maintenance and do not naturally scale to zero in the same way.",
+              "App Engine flexible can work, but typically with more overhead than Cloud Run."
+            ]
+          },
+          {
+            question: "You need asynchronous fan-out between loosely coupled services under very high event volume. Which service is central?",
+            options: ["Cloud Tasks", "Pub/Sub", "Direct synchronous HTTP chaining", "Filestore"],
+            correctIndex: 1,
+            explanations: [
+              "Cloud Tasks is for task queues, not broad event fan-out messaging.",
+              "Correct. Pub/Sub is a managed, durable event bus for decoupled systems.",
+              "Direct chaining creates tight coupling and reduced resilience.",
+              "Filestore is shared NFS storage, not an eventing platform."
+            ]
+          }
+        ]
+      },
+      {
+        name: "Infrastructure and networking",
+        count: 13,
+        templates: [
+          {
+            question: "VMs in private subnets must access Google APIs without public IPs. What should you enable?",
+            options: ["Private Google Access", "Cloud CDN", "Cloud Armor", "IAP TCP forwarding"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Private Google Access lets resources without external IPs reach Google APIs.",
+              "Cloud CDN is for caching content delivery, not private API access.",
+              "Cloud Armor protects HTTP(S) workloads, not private API routing.",
+              "IAP is for identity-aware access to apps/admin services, not this use case."
+            ]
+          },
+          {
+            question: "A platform team must centrally manage networking while app teams keep resource ownership in separate projects. Best model?",
+            options: ["Shared VPC host + service projects", "Only VPC peering between all projects", "One single project for everything", "Cloud VPN across projects"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Shared VPC centralizes network administration with delegated service project ownership.",
+              "Peering alone does not provide centralized governance structure as effectively.",
+              "One project weakens isolation and scalable governance.",
+              "Cloud VPN is not the normal intra-organization project networking model."
+            ]
+          },
+          {
+            question: "Private instances need outbound internet access but must not accept direct inbound internet traffic. Best pattern?",
+            options: ["Cloud NAT", "Assign public IPs to all VMs", "Use DNS round-robin", "Only Cloud Router"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Cloud NAT enables outbound internet from private instances without exposing inbound paths.",
+              "Public IPs increase attack surface and violate the private-instance requirement.",
+              "DNS round-robin is not an outbound egress security control.",
+              "Cloud Router handles route exchange, not internet NAT itself."
+            ]
+          }
+        ]
+      },
+      {
+        name: "Security and compliance",
+        count: 13,
+        templates: [
+          {
+            question: "A service account needs read-only access to one BigQuery dataset. What follows least privilege?",
+            options: ["Project Owner", "Dataset-level BigQuery Data Viewer", "Project Editor", "Security Admin"],
+            correctIndex: 1,
+            explanations: [
+              "Owner is overly broad and violates least-privilege principles.",
+              "Correct. Dataset-level Data Viewer is scoped and appropriate for read-only dataset access.",
+              "Editor is broad and grants unnecessary write capabilities.",
+              "Security Admin is unrelated and overly privileged."
+            ]
+          },
+          {
+            question: "You must reduce data exfiltration risk for managed services across projects. Which control is designed for this?",
+            options: ["VPC Service Controls", "Cloud CDN signed URLs", "Cloud Armor WAF", "Cloud NAT logs"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. VPC Service Controls create service perimeters to limit exfiltration vectors.",
+              "Signed URLs apply to object access, not broad service perimeter enforcement.",
+              "WAF protects HTTP ingress, not managed service API perimeter boundaries.",
+              "NAT logs aid visibility but do not enforce data perimeter restrictions."
+            ]
+          },
+          {
+            question: "A CI platform must avoid long-lived service account key files. Preferred method?",
+            options: ["Commit encrypted key files", "Workload Identity Federation", "Shared root account", "Disable audit logs"],
+            correctIndex: 1,
+            explanations: [
+              "Even encrypted key files still create key lifecycle and exposure risk.",
+              "Correct. Workload Identity Federation enables keyless, short-lived credentials.",
+              "Shared high-privilege identities reduce accountability and increase blast radius.",
+              "Disabling audit logs undermines compliance and incident response."
+            ]
+          }
+        ]
+      },
+      {
+        name: "Reliability and operations",
+        count: 13,
+        templates: [
+          {
+            question: "A VM-based service must survive zonal failure automatically with minimal downtime. Which deployment is most appropriate?",
+            options: ["Single zonal VM", "Regional Managed Instance Group", "Manual snapshots only", "One VM with larger CPU"],
+            correctIndex: 1,
+            explanations: [
+              "Single-zone deployment creates a single point of failure.",
+              "Correct. Regional MIGs distribute instances across zones with autohealing.",
+              "Snapshots support recovery, not immediate high-availability failover.",
+              "Larger single VM does not solve zonal resilience."
+            ]
+          },
+          {
+            question: "You want reliability targets aligned to user impact and release decisions. What should be established?",
+            options: ["SLIs/SLOs and error budgets", "Only CPU > 80% alerts", "Monthly cost reports", "Only deployment frequency metrics"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. SLIs, SLOs, and error budgets are core SRE controls for reliability management.",
+              "CPU thresholds are internal signals, not complete user-facing reliability targets.",
+              "Cost reports are important, but they do not define reliability objectives.",
+              "Delivery metrics are useful but not a replacement for SLO governance."
+            ]
+          },
+          {
+            question: "A workload requires recovery within 15 minutes and maximum data loss of 5 minutes. Which objective pairing is correct?",
+            options: ["RTO 15m, RPO 5m", "RTO 5m, RPO 15m", "RTO 24h, RPO 24h", "No DR needed if backups exist"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. This exactly maps to the stated recovery and data-loss requirements.",
+              "This reverses objectives and does not satisfy requirements.",
+              "24h objectives are far outside the requirement.",
+              "Backups alone do not guarantee required recovery objectives."
+            ]
+          }
+        ]
+      },
+      {
+        name: "Migration",
+        count: 12,
+        templates: [
+          {
+            question: "A legacy VM workload must migrate quickly with minimal code change. Best strategy?",
+            options: ["Rehost (lift-and-shift)", "Full rewrite before migration", "Delay indefinitely", "Replace with unrelated SaaS immediately"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Rehosting minimizes code changes and shortens migration timeline.",
+              "Full rewrites are slower and riskier for rapid migration goals.",
+              "Indefinite delay does not meet migration objectives.",
+              "Forced SaaS replacement may not fit business or technical requirements."
+            ]
+          },
+          {
+            question: "For low-downtime relational DB migration to Cloud SQL, what approach is preferred?",
+            options: ["Database Migration Service continuous replication", "Long offline CSV export/import", "Schema-only migration", "Cloud Storage lifecycle rules"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. DMS continuous replication supports low-downtime cutover.",
+              "Long offline exports create major downtime and risk.",
+              "Schema-only migration does not preserve live operational data.",
+              "Lifecycle rules are unrelated to DB migration."
+            ]
+          },
+          {
+            question: "Which migration planning activity should happen before scheduling migration waves?",
+            options: ["Discovery and dependency mapping", "Randomly migrate servers", "Delete old systems early", "Skip inventory and estimate by guess"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Discovery and dependency mapping are foundational to safe migration sequencing.",
+              "Random wave planning can break dependencies and cause outages.",
+              "Early deletion risks irreversible data/service loss.",
+              "Guess-based planning is unreliable and risky."
+            ]
+          }
+        ]
+      },
+      {
+        name: "Data and analytics",
+        count: 12,
+        templates: [
+          {
+            question: "You need serverless petabyte-scale SQL analytics. Which service is best?",
+            options: ["BigQuery", "Cloud SQL", "Memorystore", "Cloud Spanner"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. BigQuery is a serverless analytical warehouse built for large-scale SQL analytics.",
+              "Cloud SQL is transactional relational DB, not petabyte warehouse analytics.",
+              "Memorystore is a cache service, not a data warehouse.",
+              "Spanner is transactional distributed SQL, not primary analytical warehouse."
+            ]
+          },
+          {
+            question: "A streaming pipeline requires real-time windowed processing with autoscaling and managed operations. Best service?",
+            options: ["Dataflow streaming", "Dataproc batch cluster", "Cloud Composer only", "Storage Transfer Service"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Dataflow is purpose-built for managed streaming and batch pipelines.",
+              "Dataproc batch clusters are less ideal for low-latency streaming needs.",
+              "Composer orchestrates jobs but is not itself stream processing compute.",
+              "Storage Transfer Service is for data movement, not stream processing logic."
+            ]
+          },
+          {
+            question: "You need very high-throughput, low-latency key-value access for profile lookups. Best datastore?",
+            options: ["Bigtable", "BigQuery", "Cloud Logging", "Cloud Storage"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Bigtable is optimized for high-throughput, low-latency key-value patterns.",
+              "BigQuery is analytics-focused, not online key-value serving.",
+              "Cloud Logging is for observability data, not profile serving.",
+              "Cloud Storage is object storage, not millisecond key-value lookup database."
+            ]
+          }
+        ]
+      },
+      {
+        name: "Cost optimization",
+        count: 12,
+        templates: [
+          {
+            question: "A predictable 24/7 workload will run for years. Which pricing model usually reduces compute cost most?",
+            options: ["Committed Use Discounts", "On-demand only", "Spot for critical stateful DB", "Disable monitoring"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. CUDs reduce cost for predictable long-running workloads.",
+              "On-demand is flexible but often costlier for steady baseline usage.",
+              "Spot VMs are interruptible and risky for critical stateful core systems.",
+              "Disabling monitoring can increase incident cost and risk."
+            ]
+          },
+          {
+            question: "A fault-tolerant batch system can handle interruptions and retry jobs. Most cost-effective compute choice?",
+            options: ["Spot VMs", "Sole-tenant nodes", "Always-on oversized VMs", "Static fleet without autoscaling"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Spot VMs provide substantial discounts for interruptible workloads.",
+              "Sole-tenant is typically for isolation/compliance and costs more.",
+              "Oversized always-on VMs increase waste.",
+              "Static fleets often produce idle spend."
+            ]
+          },
+          {
+            question: "Most object data becomes infrequently accessed after 90 days. Which storage action is best?",
+            options: ["Lifecycle transitions to colder classes", "Keep everything in Standard forever", "Move all objects to Filestore", "Manually decide once a year"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Lifecycle rules automatically align storage class to access patterns.",
+              "Standard-only storage typically overpays for cold data.",
+              "Filestore is shared file storage, not low-cost object archival.",
+              "Manual yearly action delays optimization and increases operations overhead."
+            ]
+          }
+        ]
+      },
+      {
+        name: "Governance and organization",
+        count: 12,
+        templates: [
+          {
+            question: "You need scalable governance with delegated administration and inherited policy controls. What structure should be used?",
+            options: ["Org > Folders > Projects hierarchy", "Flat unrelated projects", "Everyone gets Owner role", "Spreadsheet-based controls only"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. The resource hierarchy supports policy inheritance and controlled delegation.",
+              "Flat projects reduce policy consistency and central governance capability.",
+              "Granting Owner broadly violates least privilege and separation of duties.",
+              "Spreadsheets document intent but do not enforce controls."
+            ]
+          },
+          {
+            question: "You must prevent non-compliant resources at creation time. Which preventive control is best?",
+            options: ["Organization Policy constraints", "Quarterly reminders", "Post-incident training only", "Disable IAM conditions"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. Organization Policy can enforce hard constraints before deployment.",
+              "Reminders are advisory and non-enforcing.",
+              "Post-incident actions are reactive, not preventive.",
+              "Disabling IAM conditions weakens governance."
+            ]
+          },
+          {
+            question: "Which approach makes infrastructure changes auditable, reviewable, and repeatable?",
+            options: ["Infrastructure as Code with VCS reviews", "Direct console changes without review", "No change tracking", "Automation with personal accounts"],
+            correctIndex: 0,
+            explanations: [
+              "Correct. IaC with version control and review provides clear auditability and repeatability.",
+              "Unreviewed console changes create drift and poor traceability.",
+              "No tracking fails governance and incident reconstruction requirements.",
+              "Personal accounts for automation weaken identity governance controls."
+            ]
+          }
+        ]
+      }
+    ];
+
+    const questions = [];
+    let id = 1;
+    for (const domain of domainBlueprints) {
+      for (let i = 0; i < domain.count; i += 1) {
+        // Reuse curated templates per domain to deterministically reach the target exam size.
+        const template = domain.templates[i % domain.templates.length];
+        questions.push({
+          id,
+          domain: domain.name,
+          question: `[${domain.name}] ${template.question}`,
+          options: template.options,
+          correctIndex: template.correctIndex,
+          explanations: template.explanations
+        });
+        id += 1;
+      }
+    }
+
+    const state = {
+      index: 0,
+      answers: Array(questions.length).fill(null)
+    };
+
+    const app = document.getElementById("app");
+
+    function domainBreakdown() {
+      const result = {};
+      questions.forEach((question, index) => {
+        const selected = state.answers[index];
+        const correct = selected !== null && selected === question.correctIndex;
+        if (!result[question.domain]) {
+          result[question.domain] = { total: 0, answered: 0, correct: 0 };
+        }
+        result[question.domain].total += 1;
+        if (selected !== null) {
+          result[question.domain].answered += 1;
+          if (correct) result[question.domain].correct += 1;
+        }
+      });
+      return result;
+    }
+
+    function render() {
+      const current = questions[state.index];
+      const selected = state.answers[state.index];
+      const answered = state.answers.filter((answer) => answer !== null).length;
+      const correct = state.answers.filter((answer, index) => answer !== null && answer === questions[index].correctIndex).length;
+
+      const feedback = selected === null
+        ? ""
+        : (() => {
+            const isCorrect = selected === current.correctIndex;
+            const summary = isCorrect
+              ? "Correct."
+              : `Incorrect. Correct answer: ${String.fromCharCode(65 + current.correctIndex)}.`;
+            const message = current.explanations[selected];
+            return `<div class="feedback ${isCorrect ? "ok" : "bad"}"><strong>${summary}</strong><br>${message}</div>`;
+          })();
+
+      const optionHtml = current.options.map((option, idx) => {
+        let cls = "";
+        if (selected !== null) {
+          if (idx === current.correctIndex) cls = "correct";
+          if (idx === selected && idx !== current.correctIndex) cls = "incorrect";
+        }
+        return `<button class="opt ${cls}" data-idx="${idx}" ${selected !== null ? "disabled" : ""}>${String.fromCharCode(65 + idx)}) ${option}</button>`;
+      }).join("");
+
+      const breakdown = domainBreakdown();
+      const breakdownHtml = Object.entries(breakdown)
+        .map(([name, stats]) => `<div class="pill"><strong>${name}</strong><br>${stats.correct}/${stats.answered} correct (of ${stats.total})</div>`)
+        .join("");
+
+      app.innerHTML = `
+        <div class="meta">Question ${state.index + 1} of ${questions.length} · Answered: ${answered} · Correct: ${correct}</div>
+        <progress value="${answered}" max="${questions.length}"></progress>
+        <div class="meta">Progress: ${Math.round((answered / questions.length) * 100)}%</div>
+        <div class="question">${current.question}</div>
+        <div class="options">${optionHtml}</div>
+        ${feedback}
+        <div class="controls">
+          <button class="nav" id="prevBtn" ${state.index === 0 ? "disabled" : ""}>Previous</button>
+          <button class="nav" id="nextBtn" ${state.index === questions.length - 1 ? "disabled" : ""}>Next</button>
+        </div>
+        <div class="summary-grid">${breakdownHtml}</div>
+      `;
+
+      app.querySelectorAll(".opt").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (state.answers[state.index] !== null) return;
+          state.answers[state.index] = Number(button.dataset.idx);
+          render();
+        });
+      });
+
+      document.getElementById("prevBtn").addEventListener("click", () => {
+        if (state.index > 0) {
+          state.index -= 1;
+          render();
+        }
+      });
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        if (state.index < questions.length - 1) {
+          state.index += 1;
+          render();
+        }
+      });
+    }
+
+    if (questions.length !== 100) {
+      app.innerHTML = `<div class="feedback bad"><strong>Configuration error.</strong><br>Expected 100 questions, found ${questions.length}. Verify that all domain counts in <code>domainBlueprints</code> sum to 100.</div>`;
+    } else {
+      render();
+    }
+  </script>
+</body>
+</html>
