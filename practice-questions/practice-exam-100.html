@@ -467,6 +467,7 @@
     let id = 1;
     for (const domain of domainBlueprints) {
       for (let i = 0; i < domain.count; i += 1) {
+        // Reuse curated templates per domain to deterministically reach the target exam size.
         const template = domain.templates[i % domain.templates.length];
         questions.push({
           id,
@@ -572,7 +573,7 @@
     }
 
     if (questions.length !== 100) {
-      app.innerHTML = `<div class="feedback bad"><strong>Configuration error.</strong><br>Expected 100 questions, found ${questions.length}.</div>`;
+      app.innerHTML = `<div class="feedback bad"><strong>Configuration error.</strong><br>Expected 100 questions, found ${questions.length}. Verify that all domain counts in <code>domainBlueprints</code> sum to 100.</div>`;
     } else {
       render();
     }
