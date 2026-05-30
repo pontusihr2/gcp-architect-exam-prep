@@ -464,21 +464,62 @@
     ];
 
     const questions = [];
+    const letterFor = (index) => String.fromCharCode(65 + index);
+    const trimCorrectPrefix = (text) => text.replace(/^Correct\.\s*/i, "");
+
     let id = 1;
     for (const domain of domainBlueprints) {
       for (let i = 0; i < domain.count; i += 1) {
-        // Reuse curated templates per domain to deterministically reach the target exam size.
+        // Build unique prompts while preserving deterministic domain distribution.
         const template = domain.templates[i % domain.templates.length];
+        const variant = Math.floor(i / domain.templates.length) + 1;
+        const variantSuffix = variant > 1 ? ` (Scenario variant ${variant})` : "";
         questions.push({
           id,
           domain: domain.name,
-          question: `[${domain.name}] ${template.question}`,
+          question: `[${domain.name}] ${template.question}${variantSuffix}`,
           options: template.options,
           correctIndex: template.correctIndex,
           explanations: template.explanations
         });
         id += 1;
       }
+    }
+
+    function assertNoDuplicateQuestionText(questionList) {
+      const seen = new Set();
+      const duplicates = new Set();
+      questionList.forEach((question) => {
+        if (seen.has(question.question)) {
+          duplicates.add(question.question);
+        }
+        seen.add(question.question);
+      });
+      if (duplicates.size > 0) {
+        throw new Error(`Duplicate question text detected (${duplicates.size}).`);
+      }
+    }
+
+    function assertDomainDistribution(questionList) {
+      const expected = Object.fromEntries(domainBlueprints.map((domain) => [domain.name, domain.count]));
+      const actual = {};
+      questionList.forEach((question) => {
+        actual[question.domain] = (actual[question.domain] || 0) + 1;
+      });
+
+      for (const [domainName, expectedCount] of Object.entries(expected)) {
+        if (actual[domainName] !== expectedCount) {
+          throw new Error(`Domain distribution mismatch for "${domainName}": expected ${expectedCount}, found ${actual[domainName] || 0}.`);
+        }
+      }
+    }
+
+    function assertExamConfiguration(questionList) {
+      if (questionList.length !== 100) {
+        throw new Error(`Expected 100 questions, found ${questionList.length}.`);
+      }
+      assertDomainDistribution(questionList);
+      assertNoDuplicateQuestionText(questionList);
     }
 
     const state = {
@@ -517,8 +558,12 @@
             const isCorrect = selected === current.correctIndex;
             const summary = isCorrect
               ? "Correct."
-              : `Incorrect. Correct answer: ${String.fromCharCode(65 + current.correctIndex)}.`;
-            const message = current.explanations[selected];
+              : `Incorrect. Correct answer: ${letterFor(current.correctIndex)}.`;
+            const selectedExplanation = current.explanations[selected];
+            const correctExplanation = trimCorrectPrefix(current.explanations[current.correctIndex]);
+            const message = isCorrect
+              ? correctExplanation
+              : `${selectedExplanation}<br><br><strong>Why ${letterFor(current.correctIndex)} is correct:</strong> ${correctExplanation}`;
             return `<div class="feedback ${isCorrect ? "ok" : "bad"}"><strong>${summary}</strong><br>${message}</div>`;
           })();
 
@@ -528,7 +573,7 @@
           if (idx === current.correctIndex) cls = "correct";
           if (idx === selected && idx !== current.correctIndex) cls = "incorrect";
         }
-        return `<button class="opt ${cls}" data-idx="${idx}" ${selected !== null ? "disabled" : ""}>${String.fromCharCode(65 + idx)}) ${option}</button>`;
+        return `<button class="opt ${cls}" data-idx="${idx}" ${selected !== null ? "disabled" : ""}>${letterFor(idx)}) ${option}</button>`;
       }).join("");
 
       const breakdown = domainBreakdown();
@@ -572,10 +617,11 @@
       });
     }
 
-    if (questions.length !== 100) {
-      app.innerHTML = `<div class="feedback bad"><strong>Configuration error.</strong><br>Expected 100 questions, found ${questions.length}. Verify that all domain counts in <code>domainBlueprints</code> sum to 100.</div>`;
-    } else {
+    try {
+      assertExamConfiguration(questions);
       render();
+    } catch (error) {
+      app.innerHTML = `<div class="feedback bad"><strong>Configuration error.</strong><br>${error.message} Verify domain counts and uniqueness in <code>domainBlueprints</code>.</div>`;
     }
   </script>
 </body>
